@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mundos de Dragon Ball</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        #dragon {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .planet-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .planet-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .planet-card h2 {
+            color: #FFD700;
+            margin-bottom: 15px;
+            font-size: 1.6rem;
+            border-bottom: 2px solid #FFD700;
+            padding-bottom: 10px;
+        }
+        
+        .planet-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #FFD700;
+        }
+        
+        .planet-description {
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+        
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            padding: 40px;
+            grid-column: 1 / -1;
+        }
+        
+        .error {
+            text-align: center;
+            color: #ff6b6b;
+            padding: 20px;
+            grid-column: 1 / -1;
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            #dragon {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mundos de Dragon Ball</h1>
+            <p class="subtitle">Explora todos los planetas del universo Dragon Ball</p>
+        </header>
+        
+        <div id="dragon">
+            <div class="loading">Cargando planetas...</div>
+        </div>
+        
+        <footer>
+            <p>Dragon Ball API - Proyecto educativo</p>
+        </footer>
+    </div>
+
+    <script>
+        async function getDragonMundos() {
+            const planetContenedor = document.getElementById("dragon");
+            
+            try {
+                // Mostrar estado de carga
+                planetContenedor.innerHTML = '<div class="loading">Cargando planetas...</div>';
+                
+                let respuesta = await fetch("https://dragonball-api.com/api/planets");
+                
+                if (!respuesta.ok) {
+                    throw new Error(`Error HTTP: ${respuesta.status}`);
+                }
+                
+                let datos = await respuesta.json();
+                
+                // Limpiar contenedor
+                planetContenedor.innerHTML = '';
+                
+                // Verificar si hay datos
+                if (!datos.items || datos.items.length === 0) {
+                    planetContenedor.innerHTML = '<div class="error">No se encontraron planetas</div>';
+                    return;
+                }
+                
+                // Crear elementos para cada planeta
+                datos.items.forEach(planet => {
+                    let planetDiv = document.createElement("div");
+                    planetDiv.className = "planet-card";
+                    
+                    planetDiv.innerHTML = `
+                        <h2>${planet.name}</h2>
+                        <img class="planet-image" src="${planet.image}" alt="Imagen de ${planet.name}">
+                        <p class="planet-description">${planet.description || 'Descripción no disponible'}</p>
+                    `;
+                    
+                    planetContenedor.appendChild(planetDiv);
+                });
+                
+            } catch (error) {
+                console.error("Error al cargar los planetas:", error);
+                planetContenedor.innerHTML = `
+                    <div class="error">
+                        <p>Ocurrió un error al cargar los planetas: ${error.message}</p>
+                        <button onclick="getDragonMundos()" style="margin-top: 15px; padding: 10px 20px; background: #FFD700; color: #000; border: none; border-radius: 5px; cursor: pointer;">Reintentar</button>
+                    </div>
+                `;
+            }
+        }
+        
+        // Llamar a la función cuando se carga la página
+        document.addEventListener('DOMContentLoaded', getDragonMundos);
+    </script>
+</body>
+</html>
